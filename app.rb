@@ -27,19 +27,7 @@ before do
 
   halt 403 if user.nil?
 
-  client_secret = 'client_secret'
-
-  data = request.path
-  data = "#{data}?#{request.query_string}" if request.query_string.present?
-
-  if ['POST', 'PUT', 'PATCH'].include? request.request_method
-    request.body.rewind
-    data += request.body.read
-  end
-
-  computed_signature = OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new('sha1'), client_secret, data)
-
-  if computed_signature == signature
+  if 'client_secret' == signature
     pass
   else
     halt 403
@@ -51,14 +39,38 @@ get '/' do
   "index"
 end
 
-get '/users' do
+get '/api/v1/users' do
   content_type :json
-  users = User.all
+  users = User.order_by(created_at: 'desc')
   users.to_json
 end
 
-get '/tasks' do
+get '/api/v1/tasks' do
   content_type :json
-  tasks = Task.order_by(created_at: 'desc')
+  tasks = if params.present?
+    lat = params[:lat].to_f
+    lng = params[:lng].to_f
+    Task.geo_near([lat, lng]).max_distance(5)
+  else
+    Task.order_by(created_at: 'desc')
+  end
   tasks.to_json
+end
+
+post '/api/v1/tasks' do
+  content_type :json
+
+  delivery = params[:delivery]
+  location = [params[:lat].to_f, params[:lng].to_f]
+
+  unless [location, delivery].all?
+    halt 400, { message: "location and delivery params cannot be empty" }.to_json
+  end
+
+  task = Task.new(delivery: delivery, location: location)
+  if task.save
+    [201, task.to_json]
+  else
+    [500, { message: "Failed to save task" }.to_json]
+  end
 end

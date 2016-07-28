@@ -4,7 +4,6 @@ ruby '2.3.1'
 
 gem 'sinatra'
 gem 'mongoid'
-gem 'mongoid-geospatial'
 gem 'json'
 gem 'rspec'
 gem 'rack'

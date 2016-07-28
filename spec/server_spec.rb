@@ -11,6 +11,13 @@ def app
   Sinatra::Application
 end
 
+managers = User.where(role: 0)
+drivers = User.where(role: 1)
+
+def get_authorization_header
+  "123:client_secret"
+end
+
 describe 'GET API' do
 
   it "should load the home page" do
@@ -21,24 +28,43 @@ describe 'GET API' do
   end
 
   it "should not load the tasks page" do
-    get '/tasks', {}, { 'Content-Type' => 'application/json' }
+    get '/api/v1/tasks', {}, { 'Content-Type' => 'application/json' }
 
     expect(last_response).to_not be_ok
     expect(last_response.status).to eq 401
   end
 
   it "should load tasks page" do
-    uri = '/tasks'
-    body = ''
-    token = User.find_by(token: '123').token
-    client_secret = 'client_secret'
-    signature = OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new('sha1'), client_secret, uri + body)
-    header = "#{token}:#{signature}"
-
-    get '/tasks', {}, { 'HTTP_AUTHORIZATION' => header, 'Content-Type' => 'application/json' }
+    get '/api/v1/tasks', {}, { 'HTTP_AUTHORIZATION' => get_authorization_header, 'Content-Type' => 'application/json' }
 
     expect(last_response).to be_ok
     expect(last_response).to be_json
     expect(last_response.as_json[0]['delivery']).to be == 'New York'
   end
+
+  it "should load nearby tasks" do
+    get '/api/v1/tasks', { lat: 40.6643, lng: 73.9385 }, { 'HTTP_AUTHORIZATION' => get_authorization_header, 'Content-Type' => 'application/json' }
+
+    expect(last_response).to be_ok
+    expect(last_response).to be_json
+    expect(last_response.as_json.length).to be == 2
+  end
 end
+
+describe 'POST API' do
+
+  it "manager should create the task" do
+    jack = managers[0]
+    post '/api/v1/tasks', { lat: 40.6643, lng: 73.9385, delivery: "New York" }, { 'HTTP_AUTHORIZATION' => get_authorization_header, 'Content-Type' => 'application/json' }
+
+    expect(last_response.status).to eq 201
+  end
+
+  it "manager should not create the task without params" do
+    post '/api/v1/tasks', {}, { 'HTTP_AUTHORIZATION' => get_authorization_header, 'Content-Type' => 'application/json' }
+
+    expect(last_response.status).to eq 400
+  end
+
+end
+

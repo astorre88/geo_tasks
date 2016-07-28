@@ -20,12 +20,12 @@ users.each do |user|
 end
 
 tasks = [
-  ["New York", { lat: 40.6643, lng: 73.9385 }],
-  ["Los Angeles", { lat: 34.0194, lng: 118.4108 }],
-  ["Chicago", { lat: 41.8376, lng: 87.6818 }],
-  ["Houston", { lat: 29.7805, lng: 95.3863 }],
-  ["Philadelphia", { lat: 40.0094, lng: 75.1333 }],
-  ["Phoenix", { lat: 33.5722, lng: 112.0880 }]
+  ["New York", [40.6643, 73.9385]],
+  ["Los Angeles", [34.0194, 118.4108]],
+  ["Chicago", [41.8376, 87.6818]],
+  ["Houston", [29.7805, 95.3863]],
+  ["Philadelphia", [40.0094, 75.1333]],
+  ["Phoenix", [33.5722, 112.0880]]
 ]
 
 tasks.each do |task|
