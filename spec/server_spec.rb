@@ -55,8 +55,12 @@ describe 'POST API' do
 
   it "manager should create the task" do
     jack = managers[0]
-    post '/api/v1/tasks', { lat: 40.6643, lng: 73.9385, delivery: "New York" }, { 'HTTP_AUTHORIZATION' => get_authorization_header, 'Content-Type' => 'application/json' }
+    post '/api/v1/tasks', { lat: 39.6643, lng: 73.9001, delivery: "Somewhere" }, { 'HTTP_AUTHORIZATION' => get_authorization_header, 'Content-Type' => 'application/json' }
 
+    Task.count.should == 7
+    created = Task.find_by(delivery: "Somewhere")
+    expect(created).to_not eq(nil)
+    created.destroy
     expect(last_response.status).to eq 201
   end
 

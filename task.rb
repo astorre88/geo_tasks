@@ -5,7 +5,7 @@ class Task
 
   field :delivery, type: String
   field :location, type: Array
-  field :state, type: Integer, default: 0
+  field :state, type: Integer
 
   index({location: "2d"})
 
